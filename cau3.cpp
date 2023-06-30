@@ -2,22 +2,22 @@
 #include "cau1.cpp"
 using namespace std;
 
+// A
 struct Node {
     PhanSo key;
     Node *left;
     Node *right;
 };
-int compare(PhanSo a, PhanSo b);
-Node *createNode(PhanSo x);
 
+// B
 void insertNode(Node *&root, PhanSo k) {
     if (root == NULL) {
         root = createNode(k);
     }
-    if (root->key.tu == k.tu && root->key.mau == k.mau) {
+    if (root->key.tu == k.tu && root->key.mau == k.mau) { // phân số bị trùng 
         return;
     }
-    else if (compare(root->key, k) == 1) {
+    else if (compare(root->key, k) == 1) { // dùng lại hàm so sánh câu 2
         insertNode(root->left, k);
     }
     else {
@@ -32,21 +32,57 @@ Node *createNode(PhanSo x) {
     return p;
 }
 
-// Quy ước:
-// 0 => 2 phân số bằng nhau
-// -1 => phân số a lớn hơn b
-// 1 => phân số a nhỏ hơn b
-int compare(PhanSo a, PhanSo b) {
-    int tmp = a.tu * b.mau;
-    int nxt = b.tu * a.mau;
-    if (tmp == nxt) {
-        return 0;
+// C
+PhanSo findMaxSum(Node *root) {
+    PhanSo res = { 0, 0 };
+    traversal(root, res);
+    return res;
+}
+
+void traversal(Node *root, PhanSo &res) {
+    if (root == NULL) {
+        return;
     }
-    else if (tmp > nxt) {
-        return 1;
-    }
-    else {
-        return -1;
+    res = getMax(res, root->key);
+    traversal(root->left, res);
+    traversal(root->right, res);
+}
+
+PhanSo getMax(PhanSo a, PhanSo b) {
+    return a.tu + a.mau > b.tu + b.mau ? a : b;
+}
+
+// D
+// Để thực hiện được việc duyệt qua 1 cây nhị phân mà không dùng stack queue lẫn đệ quy
+// ta sử dụng phương pháp Morris Traversal
+// ý tưởng lớn của phương pháp này là 
+/// tận dụng các con trỏ rỗng trong cây để lưu trữ thông tin về việc quay lại nút gốc sau khi duyệt nút trái.
+void inorderTraversal(Node *root, PhanSo x) {
+    Node* curr = root;
+    while (curr != NULL) {
+        if (curr->left == NULL) {
+            if (curr->key.tu == x.tu) {
+                cout << curr->key.mau << '/' << curr->key.mau << '\n';
+            }
+            curr = curr->right;
+        }
+        else {
+            Node* pre = curr->left;
+            while (pre->right != NULL && pre->right != curr) {
+                pre = pre->right;
+            }
+            if (pre->right == NULL) {
+                pre->right = curr;
+                curr = curr->left;
+            }
+            else {
+                pre->right = nullptr;
+                if (curr->key.tu == x.tu) {
+                    cout << curr->key.mau << '/' << curr->key.mau << '\n';
+                }
+                curr = curr->right;
+            }
+        }
     }
 }
 
