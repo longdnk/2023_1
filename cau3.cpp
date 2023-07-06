@@ -32,7 +32,8 @@ Node *createNode(PhanSo x) {
     return p;
 }
 
-// C
+// C duyệt theo thứ tự node left right => nếu tìm được phân só đạt yêu cầu thì cập nhật kết quả
+// => khởi tạo phần tử là { 0, 0 } (phân số không xác định), tìm không được thì luôn trả về { 0, 0 } => báo lỗi hoặc cây rỗng
 PhanSo findMaxSum(Node *root) {
     PhanSo res = { 0, 0 };
     traversal(root, res);
@@ -52,35 +53,69 @@ PhanSo getMax(PhanSo a, PhanSo b) {
     return a.tu + a.mau > b.tu + b.mau ? a : b;
 }
 
+// Tổng quát duyệt node left right
+void nodeLeftRight(Node *root) {
+    if (root == NULL) {
+        return;
+    }
+    cout << root->key << '\n';
+    nodeLeftRight(root->left);
+    nodeLeftRight(root->right);
+}
+
 // D
 // Để thực hiện được việc duyệt qua 1 cây nhị phân mà không dùng stack queue lẫn đệ quy
 // ta sử dụng phương pháp Morris Traversal
 // ý tưởng lớn của phương pháp này là 
 /// tận dụng các con trỏ rỗng trong cây để lưu trữ thông tin về việc quay lại nút gốc sau khi duyệt nút trái.
 void inorderTraversal(Node *root, PhanSo x) {
-    Node* curr = root;
-    while (curr != NULL) {
-        if (curr->left == NULL) {
-            if (curr->key.tu == x.tu) {
-                cout << curr->key.mau << '/' << curr->key.mau << '\n';
+    while (root) {
+        if (root->left == NULL) {
+            if (root->key.tu == x.tu) {
+                cout << root->key.tu << '/' << root->key.mau << '\n';
             }
-            curr = curr->right;
+            root = root->right;
         }
         else {
-            Node* pre = curr->left;
-            while (pre->right != NULL && pre->right != curr) {
-                pre = pre->right;
+            Node *current = root->left;
+            while (current->right && current->right != root) {
+                current = current->right;
             }
-            if (pre->right == NULL) {
-                pre->right = curr;
-                curr = curr->left;
+            if (current->right == root) {
+                current->right = NULL;
+                root = root->right;
             }
             else {
-                pre->right = nullptr;
-                if (curr->key.tu == x.tu) {
-                    cout << curr->key.mau << '/' << curr->key.mau << '\n';
+                if (root->key.tu == x.tu) {
+                    cout << root->key.tu << '/' << root->key.mau << '\n';
                 }
-                curr = curr->right;
+                current->right = root;
+                root = root->left;
+            }
+        }
+    }
+}
+
+// tổng quát Morris Traversal 
+void morrisTraversal(Node *root) {
+    while (root) {
+        if (root->left == NULL) {
+            cout << root->key << ' ';
+            root = root->right;
+        }
+        else {
+            Node *current = root->left;
+            while (current->right && current->right != root) {
+                current = current->right;
+            }
+            if (current->right == root) {
+                current->right = NULL;
+                root = root->right;
+            }
+            else {
+                cout << root->key << ' ';
+                current->right = root;
+                root = root->left;
             }
         }
     }

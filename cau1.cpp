@@ -11,7 +11,7 @@ struct PhanSo {
 
 // A
 void input(PhanSo a[], int n) {
-    if (n <= 0) {
+    if (n <= 0 || n > 1000) {
         cout << "fail" << '\n';
         return;
     }
@@ -91,6 +91,7 @@ void change(PhanSo a[], int n) {
 // D
 // vì yêu cầu để không cho thêm mảng tạm nên ta thực hiện các công việc sau để đảm bảo yêu cầu:
 // Sao chép và đè ngược lên mảng ban đầu => thao tác sao chép và xử lý thông qua 1 mảng duy nhất
+// cách 1
 void remove(PhanSo a[], int &n) {
     if (n == 0) {
         return;
@@ -111,6 +112,37 @@ void remove(PhanSo a[], int &n) {
         }
     }
     n = index;
+}
+
+// cách 2
+// dùng 2 for tìm các phân số bằng nhau về tính chât nếu thỏa tiến hành dời các phần tử về bên trái của mảng
+// => sẽ có trường hợp sau khi mảng bị đè mà các phần tử liên tiếp nhau => lỗi logic do đang xét j + 1
+// => để khắc phục thì khi tìm thấy dời j về 1 đơn vị, tiếp tục xét các phân số đồng dạng nhau
+void removeDuplicate(PhanSo a[], int &n) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            if (compare(a[i], a[j]) == 0) {
+                deleteElement(a, n, a[j]);
+                --j;
+            }
+        }
+    }
+}
+
+void deleteElement(PhanSo a[], int &n, PhanSo x) {
+    int flag = -1;
+    for (int i = 0; i < n; ++i) {
+        if (a[i].tu == x.tu && a[i].mau == x.mau) {
+            flag = i;
+            break;
+        }
+    }
+    if (flag != -1) {
+        --n;
+        for (int j = flag; j < n; ++j) {
+            a[j] = a[j + 1];
+        }
+    }
 }
 
 // Quy ước

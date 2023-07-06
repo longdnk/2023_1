@@ -118,10 +118,10 @@ int getListSize(List *ls) {
 void sortList(List *ls) {
     for (Node *p = ls->head; p != NULL; p = p->next) {
         for (Node *q = p->next; q != NULL; q = q->next) {
-            if (p->key.tu % 2 == 0 && p->key.tu > q->key.tu) {
+            if (p->key.tu % 2 == 0 && q->key.tu % 2 == 0 && compare(p->key, q->key) == 1) {
                 swap(p->key, q->key);
             }
-            if (p->key.tu % 2 != 0 && p->key.tu < q->key.tu) {
+            if (p->key.tu % 2 != 0 && q->key.tu % 2 != 0 && compare(p->key, q->key) == -1) {
                 swap(p->key, q->key);
             }
         }
@@ -134,10 +134,10 @@ void sortList(List *ls) {
     while (current != NULL) {
         tmp = current->next;
         while (tmp != NULL) {
-            if (current->key.tu % 2 == 0 && current->key.tu > tmp->key.tu) {
+            if (current->key.tu % 2 == 0 && tmp->key.tu % 2 == 0 && compare(current->key, tmp->key) == 1) {
                 swap(current->key, tmp->key);
             }
-            if (current->key.tu % 2 != 0 && current->key.tu < tmp->key.tu) {
+            if (current->key.tu % 2 != 0 && tmp->key.tu % 2 != 0 && compare(current->key, tmp->key) == -1) {
                 swap(current->key, tmp->key);
             }
             tmp = tmp->next;
@@ -152,6 +152,53 @@ void swap(PhanSo &a, PhanSo &b) {
     b = tmp;
 }
 
+// cách giải khác có độ phúc tạp O(nlogn)
+List *sort(List *&ls) {
+    ls->head = mergeSort(ls->head);
+    while (ls->tail->next != NULL) {
+        ls->tail = ls->tail->next;
+    }
+    return ls;
+}
+
+Node *mergeSort(Node *head) {
+    if (!head || !head->next)
+        return head;
+    Node *second = split(head);
+    head = mergeSort(head);
+    second = mergeSort(second);
+    return merge(head, second);
+}
+
+Node *merge(Node *first, Node *second) {
+    if (first == NULL)
+        return second;
+
+    if (second == NULL)
+        return first;
+
+    if (compare(first->key, second->key) == -1 && first->key.tu % 2 == 0 && second->key.tu % 2 == 0) {
+        first->next = merge(first->next, second);
+        return first;
+    }
+    
+    else if (compare(first->key, second->key) == 1 && first->key.tu % 2 != 0 && second->key.tu % 2 != 0) {
+        second->next = merge(first, second->next);
+        return second;
+    }
+}
+
+Node *split(Node *head) {
+    Node *fast = head, *slow = head;
+    while (fast->next && fast->next->next) {
+        fast = fast->next->next;
+        slow = slow->next;
+    }
+    Node *temp = slow->next;
+    slow->next = NULL;
+    return temp;
+}
+
 // Phần này là code bổ sung thêm kiến thức về việc sắp xếp danh sách liên kết 
 // giả sử ta có danh sách liên kết các số nguyên
 struct tmpList {
@@ -159,7 +206,7 @@ struct tmpList {
     tmpList *next;
 };
 
-// O(N ^ 2)
+// O(N ^ 2), Interchange Sort
 // Dùng for
 void InterchangeSort(tmpList *&head) {
     for (tmpList *p = head; p != NULL; p = p->next) {
@@ -188,6 +235,43 @@ void InterchangeSort(tmpList *&head) {
         }
         currentNode = currentNode->next;
     }
+}
+//  O(nlogn) Merge Sort
+tmpList *mergeSort(tmpList *head) {
+    if (!head || !head->next)
+        return head;
+    tmpList *second = split(head);
+    head = mergeSort(head);
+    second = mergeSort(second);
+    return merge(head, second);
+}
+
+tmpList *merge(tmpList *first, tmpList *second) {
+    if (first == NULL)
+        return second;
+
+    if (second == NULL)
+        return first;
+
+    if (first->key < second->key) {
+        first->next = merge(first->next, second);
+        return first;
+    }
+    else {
+        second->next = merge(first, second->next);
+        return second;
+    }
+}
+
+tmpList *split(tmpList *head) {
+    tmpList *fast = head, *slow = head;
+    while (fast->next && fast->next->next) {
+        fast = fast->next->next;
+        slow = slow->next;
+    }
+    tmpList *temp = slow->next;
+    slow->next = NULL;
+    return temp;
 }
 
 // code bổ sung để minh họa 
